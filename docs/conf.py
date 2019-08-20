@@ -20,7 +20,6 @@ sys.path.insert(0, os.path.abspath('../'))
 
 from bulwark import project_info
 
-
 # -- Project information -----------------------------------------------------
 project = project_info.NAME
 author = project_info.AUTHOR

@@ -4,7 +4,6 @@ repos:
     hooks:
     -   id: autopep8
         args: [--global-config, .flake8]
-        language_version: python3.7
 
   - repo: https://github.com/asottile/seed-isort-config
     rev: v1.9.1
@@ -12,10 +11,10 @@ repos:
       - id: seed-isort-config
 
   - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v4.3.21
+    rev: v4.3.1  # newer versions fail to honor skip=
     hooks:
       - id: isort
-        language_version: python3.7
+        args: [--settings-path, .isort.cfg]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.2.3
