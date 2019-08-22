@@ -20,9 +20,9 @@ If you `join` and you have duplicates in either DataFrame you will have addition
 If you're not _expecting_ to see duplicates in either DataFrame, confirm that the resulting DataFrame has the same number of rows that you started with.
 
 ```
-In[] df_left = pd.DataFrame({'fruit': ["apple", "orange", "pear"], 'colour': ['green', 'orange', 'green']}).set_index('fruit')
-In[] df_right = pd.DataFrame({'fruit': ["apple", "orange", "orange"], 'price': [10, 20, 21]}).set_index('fruit')
-In[] df_left.join(df_right)
+df_left = pd.DataFrame({'fruit': ["apple", "orange", "pear"], 'colour': ['green', 'orange', 'green']}).set_index('fruit')
+df_right = pd.DataFrame({'fruit': ["apple", "orange", "orange"], 'price': [10, 20, 21]}).set_index('fruit')
+df_left.join(df_right)
 
          colour  price
 fruit                
@@ -38,13 +38,22 @@ pear     green    NaN
 `sklearn` will throw an error if you call `estimator.fit` on a matrix (which can be a Pandas Dataframe) containing `NaN` values.
 
 ```
-example - show sklearn tiny demo off of a df
+import sklearn.linear_model, sklearn.model_selection
+df = pd.DataFrame({'feature1': [1, 1, 8, np.NaN], 'target': [0, 0, 1, 1]})
+X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(df.drop(columns='target'), df['target'], random_state=0)  
+clf = sklearn.linear_model.LogisticRegression()
+clf.fit(X_train, y_train) # Raises ValueError
+
+# instead we could check beforehand
+ck.has_no_nans(df) # Raises an exception for feature1 on a row
 ```
 
 ## Check for no `inf` or `NaN` after using numpy
 
 ```
-example - show e.g. log on a series including a 0
+df_customers = pd.DataFrame({'age': [23, 72, 0]}, index=['user_a', 'user_b', 'user_c'])
+df_customers['age_scaled'] = df_customers['age'].apply(np.log) # causes a -inf on log(0)
+ck.has_no_neg_infs(df_customers) # raises an exception
 ```
 
 # Asserts
@@ -54,12 +63,13 @@ example - show e.g. log on a series including a 0
 They do combine a logic test and a useful failure message in a one-liner. Philosophically they're used for checking things that should _never_ fail at a logical level in your code so using them for data checking will look odd to many developers.
 
 You might write something like:
-`assert df['age'] > 0, "We never expect to see 0- or negative-aged customers"`
-but you'll be better off by writing a more engineered solution:
+`assert df['age'] >= 1, "We never expect to see 0- or negative-aged customers"`
+but you'll be better off by writing a more engineered solution that can't be disabled:
+
 ```
-df_customers = pd.DataFrame({'age': [23, 72, -1]}, index=['user_a', 'user_b', 'user_c'])
-# We only expect positive ages in the range [0, 125]
-ck.has_vals_within_range(df_customers, items={'age': [0, 125]}) # raises an AssertionError
+df_customers = pd.DataFrame({'age': [23, 72, 0]}, index=['user_a', 'user_b', 'user_c'])
+# We only expect positive ages in the range [1, 125]
+ck.has_vals_within_range(df_customers, items={'age': [1, 72]})  # raises an exception
 ```
 
 Recommendation - you should do something more credible using a tool like `bulwark`.
