@@ -20,17 +20,20 @@ df_result = pd.concat((df_x, df_y))
 ck.unique_index(df_result) # raises an exception
 ```
 
-## After a `join` check that you have the same number of rows
+## After a `join` check that you have the same number of rows as you expect
 
-If you `join` and you have duplicates in either DataFrame you will have additional rows in your resulting DataFrame. By doing several manipulations in a sequence you'll quickly lose track of where the error is introduced.
+If you `join` and you have unexpected duplicates in either DataFrame you will have additional rows in your resulting DataFrame. By doing several manipulations in a sequence you'll quickly lose track of where the error is introduced.
 
-If you're not _expecting_ to see duplicates in either DataFrame, confirm that the resulting DataFrame has the same number of rows that you started with.
+If you're not _expecting_ to see duplicates in either DataFrame, confirm that the resulting DataFrame has the same number of rows that you started with. You might combine this with the previous check for unique indices.
 
 ```
-df_left = pd.DataFrame({'fruit': ["apple", "orange", "pear"], 'colour': ['green', 'orange', 'green']}).set_index('fruit')
-df_right = pd.DataFrame({'fruit': ["apple", "orange", "orange"], 'price': [10, 20, 21]}).set_index('fruit')
-df_left.join(df_right)
+df_left = pd.DataFrame({'fruit': ["apple", "orange", "pear"], 
+                        'colour': ['green', 'orange', 'green']}).set_index('fruit')
+df_right = pd.DataFrame({'fruit': ["apple", "orange", "orange"], 
+                         'price': [10, 20, 21]}).set_index('fruit')
 
+df_result = df_left.join(df_right)
+df_result
          colour  price
 fruit                
 apple    green   10.0
@@ -38,6 +41,8 @@ orange  orange   20.0
 orange  orange   21.0
 pear     green    NaN
 
+ck.is_shape(df_result, (df_left.shape[0],-1)) # raises an exception
+ck.is_shape(df_result, (df_right.shape[0],-1)) # raises an exception
 ```
 
 ## Before fitting in scikit-learn check for `NaN` values
