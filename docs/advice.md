@@ -11,7 +11,14 @@ By defensibly writing lightweight tests from an early point in your data transfo
 
 ## Check for a unique index
 
-After concatenating you might check for uniqueness in your index. During R&D it is easy to concatenate DataFrames that each have a unique index but combined have overlapping indices yielding a non-unique index in the result.
+After concatenating you might check for uniqueness in your index. During R&D it is easy to concatenate DataFrames that each have a unique index but combined have overlapping indices yielding a non-unique index in the result. Checking for uniqueness avoids such errors propagating through our code.
+
+```
+df_x = pd.DataFrame({'values': [22, 33, 44]}) 
+df_y = pd.DataFrame({'values': [101, 102]}, index=[2, 3])
+df_result = pd.concat((df_x, df_y)) 
+ck.unique_index(df_result) # raises an exception
+```
 
 ## After a `join` check that you have the same number of rows
 
