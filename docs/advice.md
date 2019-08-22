@@ -42,13 +42,18 @@ import sklearn.linear_model, sklearn.model_selection
 df = pd.DataFrame({'feature1': [1, 1, 8, np.NaN], 'target': [0, 0, 1, 1]})
 X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(df.drop(columns='target'), df['target'], random_state=0)  
 clf = sklearn.linear_model.LogisticRegression()
-clf.fit(X_train, y_train) # Raises ValueError
+clf.fit(X_train, y_train) # Raises: ValueError: Input contains NaN, infinity or a value too large for dtype('float64'). 
+```
 
-# instead we could check beforehand
-ck.has_no_nans(df) # Raises an exception for feature1 on a row
+We could check on `df` (or on a specific matrix like `X_train`) for no NaN values to help a user focus in on the exact row that's a problem:
+
+```
+ck.has_no_nans(df) # Raises AssertionError: (3, 'feature1')
 ```
 
 ## Check for no `inf` or `NaN` after using numpy
+
+NumPy can cause infinite or NaN results, `log` is a common culprit. We can check for specific conditions such as "no negative infs" in our result to stop errors propagating through our results:
 
 ```
 df_customers = pd.DataFrame({'age': [23, 72, 0]}, index=['user_a', 'user_b', 'user_c'])
@@ -74,7 +79,7 @@ ck.has_vals_within_range(df_customers, items={'age': [1, 72]})  # raises an exce
 
 Recommendation - you should do something more credible using a tool like `bulwark`.
 
-# Custom logic and a reporting function
+# Custom logic and a reporting function (NEEDS MORE THOUGHT)
 
 We can write a test for a data quality check using conventional tools (e.g. logic, `numpy.testing` and `pandas.testing` functions) and upon failure raise a suitable exception with a message. We might raise a `ValueError` if our type is ok but our value is bad, we might raise a `TypeError` if the expected type is wrong (e.g. we got a `str` when we expected an `int`).
 
